@@ -21,6 +21,13 @@ menuconfig STAGING
 
 	  If in doubt, say N here.
 
+config RTMM
+	tristate "RRTM"
+	default y
+
+config KTRACE
+	tristate "KTRACE"
+	default y
 
 if STAGING
 
@@ -91,10 +98,6 @@ source "drivers/staging/gs_fpgaboot/Kconfig"
 source "drivers/staging/skein/Kconfig"
 
 source "drivers/staging/unisys/Kconfig"
-
-source "drivers/staging/rtmm/Kconfig"
-
-source "drivers/staging/ktrace/Kconfig"
 
 source "drivers/staging/clocking-wizard/Kconfig"
 

@@ -56,6 +56,19 @@
 #include "mtk_static_power_mt6785.h"
 #endif
 
+// 15 = 806Mhz
+unsigned int __read_mostly gpu_clock = -1;
+static int __init read_gpu_clock(char *s)
+{
+	if (s)
+		gpu_clock = simple_strtoul(s, NULL, 0);
+		if ( gpu_clock > 30 ) {
+			gpu_clock = 30;
+		}
+	return 1;
+}
+__setup("zyc.gpu_clock=", read_gpu_clock);
+
 /**
  * ===============================================
  * SECTION : Local functions declaration
@@ -3031,16 +3044,21 @@ static void __mt_gpufreq_setup_opp_table(
 	}
 
 	/* setup OPP table by device ID */
-	if (g_segment_id == MT6785U_SEGMENT)
-		g_segment_max_opp_idx = 0;
-	else if (g_segment_id == MT6785T_SEGMENT)
-		g_segment_max_opp_idx = 15;
-	else if (g_segment_id == MT6785_SEGMENT)
-		g_segment_max_opp_idx = 21;
-	else if (g_segment_id == MT6783_SEGMENT)
-		g_segment_max_opp_idx = 30;
-	else
-		g_segment_max_opp_idx = 15;
+	if ( gpu_clock == -1 ) {
+		if (g_segment_id == MT6785U_SEGMENT)
+			g_segment_max_opp_idx = 0;
+		else if (g_segment_id == MT6785T_SEGMENT)
+			g_segment_max_opp_idx = 15;
+		else if (g_segment_id == MT6785_SEGMENT)
+			g_segment_max_opp_idx = 21;
+		else if (g_segment_id == MT6783_SEGMENT)
+			g_segment_max_opp_idx = 30;
+		else
+			g_segment_max_opp_idx = 15;
+	} else {
+		g_segment_max_opp_idx = gpu_clock;
+	}
+
 
 	g_segment_min_opp_idx = NUM_OF_OPP_IDX - 1;
 

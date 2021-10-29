@@ -61,49 +61,49 @@
 #define SEG_GPU_DVFS_FREQ41		(295000)	/* KHz */
 #define SEG_GPU_DVFS_FREQ42		(270000)	/* KHz */
 
-#define SEG_GPU_DVFS_VOLT0		(87500 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT1		(86875 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT2		(86250 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT3		(85625 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT4		(85000 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT5		(84375 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT6		(83750 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT7		(83125 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT8		(82500 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT9		(81875 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT10		(81250 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT11		(80625 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT12		(80000 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT13		(79375 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT14		(78750 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT15		(78125 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT16		(77500 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT17		(76875 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT18		(76250 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT19		(75625 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT20		(75000 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT21		(74375 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT22		(73750 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT23		(73125 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT24		(72500 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT25		(71875 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT26		(71250 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT27		(70625 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT28		(70000 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT29		(69375 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT30		(68750 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT31		(68125 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT32		(67500 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT33		(66875 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT34		(66250 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT35		(65625 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT36		(65000 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT37		(64375 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT38		(63750 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT39		(63125 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT40		(62500 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT41		(61875 - 2000)		/* mV x 100 */
-#define SEG_GPU_DVFS_VOLT42		(61250 - 2000)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT0		(87500)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT1		(86875)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT2		(86250)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT3		(85625)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT4		(85000)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT5		(84375)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT6		(83750)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT7		(83125)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT8		(82500)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT9		(81875)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT10		(81250)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT11		(80625)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT12		(80000)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT13		(79375)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT14		(78750)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT15		(78125)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT16		(77500)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT17		(76875)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT18		(76250)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT19		(75625)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT20		(75000)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT21		(74375)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT22		(73750)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT23		(73125)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT24		(72500)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT25		(71875)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT26		(71250)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT27		(70625)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT28		(70000)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT29		(69375)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT30		(68750)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT31		(68125)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT32		(67500)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT33		(66875)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT34		(66250)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT35		(65625)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT36		(65000)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT37		(64375)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT38		(63750)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT39		(63125)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT40		(62500)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT41		(61875)		/* mV x 100 */
+#define SEG_GPU_DVFS_VOLT42		(61250)		/* mV x 100 */
 
 #define SEG_GPU_DVFS_VSRAM0		(97500)		/* mV x 100 */
 #define SEG_GPU_DVFS_VSRAM1		(96875)		/* mV x 100 */

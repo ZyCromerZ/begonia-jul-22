@@ -1301,9 +1301,20 @@ static const struct seq_operations proc_pid_smaps_op = {
 	.show	= show_smap
 };
 
+static const struct seq_operations proc_pid_smaps_op_sultanpid = {
+	.start	= m_start_pid,
+	.next	= m_next_pid,
+	.stop	= m_stop,
+	.show	= show_smap
+};
+
 static int pid_smaps_open(struct inode *inode, struct file *file)
 {
-	return do_maps_open(inode, file, &proc_pid_smaps_op);
+	if (sultan_pid_smap) {
+		return do_maps_open(inode, file, &proc_pid_smaps_op_sultanpid);
+	} else {
+		return do_maps_open(inode, file, &proc_pid_smaps_op);
+	}
 }
 
 static int smaps_rollup_open(struct inode *inode, struct file *file)

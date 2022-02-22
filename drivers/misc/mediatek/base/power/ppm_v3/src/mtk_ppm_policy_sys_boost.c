@@ -21,6 +21,7 @@
 
 #include "mtk_ppm_internal.h"
 
+bool ppm_sysboost_policy_status = false;
 
 static void ppm_sysboost_update_limit_cb(void);
 static void ppm_sysboost_status_change_cb(bool enable);
@@ -576,7 +577,7 @@ static int __init ppm_sysboost_policy_init(void)
 	ppm_info("@%s: register %s done!\n", __func__, sysboost_policy.name);
 
 out:
-	sysboost_policy.is_enabled = true;
+	sysboost_policy.is_enabled = ppm_sysboost_policy_status;
 	FUNC_EXIT(FUNC_LV_POLICY);
 
 	return ret;
@@ -593,6 +594,7 @@ static void __exit ppm_sysboost_policy_exit(void)
 	FUNC_EXIT(FUNC_LV_POLICY);
 }
 
+module_param(ppm_sysboost_policy_status, bool, 0664);
 module_init(ppm_sysboost_policy_init);
 module_exit(ppm_sysboost_policy_exit);
 

@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2016 MediaTek Inc.
+ * Copyright (C) 2021 XiaoMi, Inc.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -20,6 +21,7 @@
 
 #include "mtk_ppm_internal.h"
 
+bool ppm_sysboost_policy_status = false;
 
 static void ppm_sysboost_update_limit_cb(void);
 static void ppm_sysboost_status_change_cb(bool enable);
@@ -548,6 +550,8 @@ static int __init ppm_sysboost_policy_init(void)
 		case BOOST_BY_BOOT_TIME_OPT:
 			sysboost_data[i].user_name = "BOOT_TIME_OPT";
 			break;
+		case BOOST_BY_XM_THERMAL:
+			sysboost_data[i].user_name = "XM_THERM";
 		case BOOST_BY_UT:
 		default:
 			sysboost_data[i].user_name = "UT";
@@ -573,7 +577,7 @@ static int __init ppm_sysboost_policy_init(void)
 	ppm_info("@%s: register %s done!\n", __func__, sysboost_policy.name);
 
 out:
-	sysboost_policy.is_enabled = false;
+	sysboost_policy.is_enabled = ppm_sysboost_policy_status;
 	FUNC_EXIT(FUNC_LV_POLICY);
 
 	return ret;
@@ -590,6 +594,7 @@ static void __exit ppm_sysboost_policy_exit(void)
 	FUNC_EXIT(FUNC_LV_POLICY);
 }
 
+module_param(ppm_sysboost_policy_status, bool, 0664);
 module_init(ppm_sysboost_policy_init);
 module_exit(ppm_sysboost_policy_exit);
 

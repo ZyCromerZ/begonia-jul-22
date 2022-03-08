@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  *
  * (C) COPYRIGHT 2010-2020 ARM Limited. All rights reserved.
@@ -20,8 +21,6 @@
  *
  */
 
-
-
 /**
  * @file mali_kbase_mem_linux.c
  * Base kernel memory APIs, Linux implementation.
@@ -35,10 +34,9 @@
 #include <linux/fs.h>
 #include <linux/version.h>
 #include <linux/dma-mapping.h>
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 5, 0)) && \
-	(LINUX_VERSION_CODE < KERNEL_VERSION(4, 8, 0))
+#if (KERNEL_VERSION(4, 8, 0) > LINUX_VERSION_CODE)
 #include <linux/dma-attrs.h>
-#endif /* LINUX_VERSION_CODE >= 3.5.0 && < 4.8.0 */
+#endif /* LINUX_VERSION_CODE < 4.8.0 */
 #include <linux/dma-buf.h>
 #include <linux/shrinker.h>
 #include <linux/cache.h>
@@ -51,6 +49,7 @@
 #include <mmu/mali_kbase_mmu.h>
 #include <mali_kbase_caps.h>
 #include <mali_kbase_trace_gpu_mem.h>
+#include <mali_kbase_reset_gpu.h>
 
 #if ((KERNEL_VERSION(5, 3, 0) <= LINUX_VERSION_CODE) || \
 	(KERNEL_VERSION(5, 0, 0) > LINUX_VERSION_CODE))
@@ -416,7 +415,8 @@ struct kbase_va_region *kbase_mem_alloc(struct kbase_context *kctx,
 
 	if (*flags & BASE_MEM_GROW_ON_GPF) {
 		/* kbase_check_alloc_sizes() already checks extension is valid for
-		 * assigning to reg->extension */
+		 * assigning to reg->extension
+		 */
 		reg->extension = extension;
 #if !MALI_USE_CSF
 	} else if (*flags & BASE_MEM_TILER_ALIGN_TOP) {
@@ -726,35 +726,18 @@ out_unlock:
 	return freed;
 }
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 12, 0)
-static int kbase_mem_evictable_reclaim_shrink(struct shrinker *s,
-		struct shrink_control *sc)
-{
-	if (sc->nr_to_scan == 0)
-		return kbase_mem_evictable_reclaim_count_objects(s, sc);
-
-	return kbase_mem_evictable_reclaim_scan_objects(s, sc);
-}
-#endif
-
 int kbase_mem_evictable_init(struct kbase_context *kctx)
 {
 	INIT_LIST_HEAD(&kctx->evict_list);
 	mutex_init(&kctx->jit_evict_lock);
 
-	/* Register shrinker */
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3, 12, 0)
-	kctx->reclaim.shrink = kbase_mem_evictable_reclaim_shrink;
-#else
 	kctx->reclaim.count_objects = kbase_mem_evictable_reclaim_count_objects;
 	kctx->reclaim.scan_objects = kbase_mem_evictable_reclaim_scan_objects;
-#endif
 	kctx->reclaim.seeks = DEFAULT_SEEKS;
 	/* Kernel versions prior to 3.1 :
-	 * struct shrinker does not define batch */
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 1, 0)
+	 * struct shrinker does not define batch
+	 */
 	kctx->reclaim.batch = 0;
-#endif
 	register_shrinker(&kctx->reclaim);
 	return 0;
 }
@@ -1641,7 +1624,7 @@ static struct kbase_va_region *kbase_mem_from_user_buffer(
 
 	write = reg->flags & (KBASE_REG_CPU_WR | KBASE_REG_GPU_WR);
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 6, 0)
+#if KERNEL_VERSION(4, 6, 0) > LINUX_VERSION_CODE
 	faulted_pages = get_user_pages(current, current->mm, address, *va_pages,
 #if KERNEL_VERSION(4, 4, 168) <= LINUX_VERSION_CODE && \
 KERNEL_VERSION(4, 5, 0) > LINUX_VERSION_CODE
@@ -1649,7 +1632,7 @@ KERNEL_VERSION(4, 5, 0) > LINUX_VERSION_CODE
 #else
 			write, 0, pages, NULL);
 #endif
-#elif LINUX_VERSION_CODE < KERNEL_VERSION(4, 9, 0)
+#elif KERNEL_VERSION(4, 9, 0) > LINUX_VERSION_CODE
 	faulted_pages = get_user_pages(address, *va_pages,
 			write, 0, pages, NULL);
 #else
@@ -1765,7 +1748,8 @@ u64 kbase_mem_alias(struct kbase_context *kctx, u64 *flags, u64 stride,
 #ifdef CONFIG_64BIT
 	if (!kbase_ctx_flag(kctx, KCTX_COMPAT)) {
 		/* 64-bit tasks must MMAP anyway, but not expose this address to
-		 * clients */
+		 * clients
+		 */
 		*flags |= BASE_MEM_NEED_MMAP;
 		reg = kbase_alloc_free_region(&kctx->reg_rbtree_same, 0,
 				*num_pages,
@@ -1811,7 +1795,8 @@ u64 kbase_mem_alias(struct kbase_context *kctx, u64 *flags, u64 stride,
 				goto bad_handle; /* must be > 0 */
 			if (ai[i].length > stride)
 				goto bad_handle; /* can't be larger than the
-						    stride */
+						  * stride
+						  */
 			reg->gpu_alloc->imported.alias.aliased[i].length = ai[i].length;
 		} else {
 			struct kbase_va_region *aliasing_reg;
@@ -1842,16 +1827,18 @@ u64 kbase_mem_alias(struct kbase_context *kctx, u64 *flags, u64 stride,
 			if (aliasing_reg->gpu_alloc->type != KBASE_MEM_TYPE_NATIVE)
 				goto bad_handle; /* Not a native alloc */
 			if (coherent != ((aliasing_reg->flags & KBASE_REG_SHARE_BOTH) != 0))
-				goto bad_handle;
-				/* Non-coherent memory cannot alias
-				   coherent memory, and vice versa.*/
+				goto bad_handle; /* Non-coherent memory cannot
+						  * alias coherent memory, and
+						  * vice versa.
+						  */
 
 			/* check size against stride */
 			if (!ai[i].length)
 				goto bad_handle; /* must be > 0 */
 			if (ai[i].length > stride)
 				goto bad_handle; /* can't be larger than the
-						    stride */
+						  * stride
+						  */
 
 			alloc = aliasing_reg->gpu_alloc;
 
@@ -2486,11 +2473,7 @@ static int kbase_cpu_mmap(struct kbase_context *kctx,
 	 * See MIDBASE-1057
 	 */
 
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0))
 	vma->vm_flags |= VM_DONTCOPY | VM_DONTDUMP | VM_DONTEXPAND | VM_IO;
-#else
-	vma->vm_flags |= VM_DONTCOPY | VM_DONTEXPAND | VM_RESERVED | VM_IO;
-#endif
 	vma->vm_ops = &kbase_vm_ops;
 	vma->vm_private_data = map;
 
@@ -2671,7 +2654,8 @@ static int kbasep_reg_mmap(struct kbase_context *kctx,
 		/* incorrect mmap size */
 		/* leave the cookie for a potential later
 		 * mapping, or to be reclaimed later when the
-		 * context is freed */
+		 * context is freed
+		 */
 		err = -ENOMEM;
 		goto out;
 	}
@@ -2737,7 +2721,7 @@ int kbase_context_mmap(struct kbase_context *const kctx,
 	if (!(vma->vm_flags & VM_WRITE))
 		vma->vm_flags &= ~VM_MAYWRITE;
 
-	if (0 == nr_pages) {
+	if (nr_pages == 0) {
 		err = -EINVAL;
 		goto out;
 	}
@@ -2758,7 +2742,8 @@ int kbase_context_mmap(struct kbase_context *const kctx,
 	/* if not the MTP, verify that the MTP has been mapped */
 	rcu_read_lock();
 	/* catches both when the special page isn't present or
-	 * when we've forked */
+	 * when we've forked
+	 */
 	if (rcu_dereference(kctx->process_mm) != current->mm) {
 		err = -EINVAL;
 		rcu_read_unlock();
@@ -2775,7 +2760,7 @@ int kbase_context_mmap(struct kbase_context *const kctx,
 	case PFN_DOWN(BASE_MEM_MMU_DUMP_HANDLE):
 		/* MMU dump */
 		err = kbase_mmu_dump_mmap(kctx, vma, &reg, &kaddr);
-		if (0 != err)
+		if (err != 0)
 			goto out_unlock;
 		/* free the region on munmap */
 		free_on_close = 1;
@@ -2798,7 +2783,7 @@ int kbase_context_mmap(struct kbase_context *const kctx,
 	     PFN_DOWN(BASE_MEM_FIRST_FREE_ADDRESS) - 1: {
 		err = kbasep_reg_mmap(kctx, vma, &reg, &nr_pages,
 							&aligned_offset);
-		if (0 != err)
+		if (err != 0)
 			goto out_unlock;
 		/* free the region on munmap */
 		free_on_close = 1;
@@ -2871,7 +2856,8 @@ int kbase_context_mmap(struct kbase_context *const kctx,
 
 	if (vma->vm_pgoff == PFN_DOWN(BASE_MEM_MMU_DUMP_HANDLE)) {
 		/* MMU dump - userspace should now have a reference on
-		 * the pages, so we can now free the kernel mapping */
+		 * the pages, so we can now free the kernel mapping
+		 */
 		vfree(kaddr);
 		/* CPU mapping of GPU allocations have GPU VA as the vm_pgoff
 		 * and that is used to shrink the mapping when the commit size
@@ -2979,7 +2965,8 @@ static int kbase_vmap_phy_pages(struct kbase_context *kctx,
 
 	/* Note: enforcing a RO prot_request onto prot is not done, since:
 	 * - CPU-arch-specific integration required
-	 * - kbase_vmap() requires no access checks to be made/enforced */
+	 * - kbase_vmap() requires no access checks to be made/enforced
+	 */
 
 	cpu_addr = vmap(pages, page_count, VM_MAP, prot);
 
@@ -3056,7 +3043,8 @@ void *kbase_vmap(struct kbase_context *kctx, u64 gpu_addr, size_t size,
 	 * be made.
 	 *
 	 * As mentioned in kbase_vmap_prot() this means that a kernel-side
-	 * CPU-RO mapping is not enforced to allow this to work */
+	 * CPU-RO mapping is not enforced to allow this to work
+	 */
 	return kbase_vmap_prot(kctx, gpu_addr, size, 0u, map);
 }
 KBASE_EXPORT_TEST_API(kbase_vmap);
@@ -3088,7 +3076,7 @@ KBASE_EXPORT_TEST_API(kbase_vunmap);
 
 static void kbasep_add_mm_counter(struct mm_struct *mm, int member, long value)
 {
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4, 19, 0))
+#if (KERNEL_VERSION(4, 19, 0) <= LINUX_VERSION_CODE)
 	/* To avoid the build breakage due to an unexported kernel symbol
 	 * 'mm_trace_rss_stat' from later kernels, i.e. from V4.19.0 onwards,
 	 * we inline here the equivalent of 'add_mm_counter()' from linux
@@ -3172,11 +3160,7 @@ static int kbase_tracking_page_setup(struct kbase_context *kctx, struct vm_area_
 
 	/* no real access */
 	vma->vm_flags &= ~(VM_READ | VM_MAYREAD | VM_WRITE | VM_MAYWRITE | VM_EXEC | VM_MAYEXEC);
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(3, 7, 0))
 	vma->vm_flags |= VM_DONTCOPY | VM_DONTEXPAND | VM_DONTDUMP | VM_IO;
-#else
-	vma->vm_flags |= VM_DONTCOPY | VM_DONTEXPAND | VM_RESERVED | VM_IO;
-#endif
 	vma->vm_ops = &kbase_vm_special_ops;
 	vma->vm_private_data = kctx;
 
@@ -3211,15 +3195,31 @@ static void kbase_csf_user_io_pages_vm_close(struct vm_area_struct *vma)
 {
 	struct kbase_queue *queue = vma->vm_private_data;
 	struct kbase_context *kctx;
+	struct kbase_device *kbdev;
+	int err;
+	bool reset_prevented = false;
 
 	if (WARN_ON(!queue))
 		return;
 
 	kctx = queue->kctx;
+	kbdev = kctx->kbdev;
+
+	err = kbase_reset_gpu_prevent_and_wait(kbdev);
+	if (err)
+		dev_warn(
+			kbdev->dev,
+			"Unsuccessful GPU reset detected when unbinding queue (csi_index=%d), attempting to unbind regardless",
+			queue->csi_index);
+	else
+		reset_prevented = true;
 
 	mutex_lock(&kctx->csf.lock);
 	kbase_csf_queue_unbind(queue);
 	mutex_unlock(&kctx->csf.lock);
+
+	if (reset_prevented)
+		kbase_reset_gpu_allow(kbdev);
 
 	/* Now as the vma is closed, drop the reference on mali device file */
 	fput(kctx->filp);
@@ -3355,11 +3355,7 @@ static int kbase_csf_cpu_mmap_user_io_pages(struct kbase_context *kctx,
 	if (err)
 		goto map_failed;
 
-#if (KERNEL_VERSION(3, 7, 0) <= LINUX_VERSION_CODE)
 	vma->vm_flags |= VM_DONTCOPY | VM_DONTDUMP | VM_DONTEXPAND | VM_IO;
-#else
-	vma->vm_flags |= VM_DONTCOPY | VM_DONTEXPAND | VM_RESERVED | VM_IO;
-#endif
 	/* TODO use VM_MIXEDMAP, since it is more appropriate as both types of
 	 * memory with and without "struct page" backing are being inserted here.
 	 * Hw Doorbell pages comes from the device register area so kernel does
@@ -3382,7 +3378,13 @@ static int kbase_csf_cpu_mmap_user_io_pages(struct kbase_context *kctx,
 	return 0;
 
 map_failed:
-	kbase_csf_queue_unbind(queue);
+	/* The queue cannot have got to KBASE_CSF_QUEUE_BOUND state if we
+	 * reached here, so safe to use a variant of unbind that only works on
+	 * stopped queues
+	 *
+	 * This is so we don't enter the CSF scheduler from this path.
+	 */
+	kbase_csf_queue_unbind_stopped(queue);
 
 	return err;
 }

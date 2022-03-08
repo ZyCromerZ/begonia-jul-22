@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.0
 /*
  *
  * (C) COPYRIGHT 2015-2020 ARM Limited. All rights reserved.
@@ -116,7 +117,7 @@ int kbase_timeline_init(struct kbase_timeline **timeline,
 	if (!timeline || !timeline_flags)
 		return -EINVAL;
 
-	result = kzalloc(sizeof(*result), GFP_KERNEL);
+	result = vzalloc(sizeof(*result));
 	if (!result)
 		return -ENOMEM;
 
@@ -163,7 +164,7 @@ void kbase_timeline_term(struct kbase_timeline *timeline)
 	for (i = (enum tl_stream_type)0; i < TL_STREAM_TYPE_COUNT; i++)
 		kbase_tlstream_term(&timeline->streams[i]);
 
-	kfree(timeline);
+	vfree(timeline);
 }
 
 #ifdef CONFIG_MALI_DEVFREQ
@@ -178,11 +179,7 @@ static void kbase_tlstream_current_devfreq_target(struct kbase_device *kbdev)
 		unsigned long cur_freq = 0;
 
 		mutex_lock(&devfreq->lock);
-#if KERNEL_VERSION(4, 3, 0) > LINUX_VERSION_CODE
-		cur_freq = kbdev->current_nominal_freq;
-#else
 		cur_freq = devfreq->last_status.current_frequency;
-#endif
 		KBASE_TLSTREAM_AUX_DEVFREQ_TARGET(kbdev, (u64)cur_freq);
 		mutex_unlock(&devfreq->lock);
 	}

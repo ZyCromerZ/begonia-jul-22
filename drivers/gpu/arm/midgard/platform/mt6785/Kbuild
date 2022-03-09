@@ -25,8 +25,8 @@ include $(src)/Kbuild-mtk-custom-env
 MT_GPUFREQ_BRINGUP ?= 0
 
 mali_kbase-y += \
-	$(MALI_PLATFORM_DIR)/mali_kbase_config_mt6785.o \
-	$(MALI_PLATFORM_DIR)/mali_kbase_cpu_mt6785.o \
+	platform/$(MALI_PLATFORM_DIR)/mali_kbase_config_mt6785.o \
+	platform/$(MALI_PLATFORM_DIR)/mali_kbase_cpu_mt6785.o \
 #	mali_kbase_platform_fake.o
 
 ifeq ($(CONFIG_MTK_TINYSYS_SSPM_SUPPORT), y)

@@ -277,7 +277,6 @@ static const struct kbase_device_init dev_init[] = {
 	  "Misc device registration failed" },
 	{ kbase_gpuprops_populate_user_buffer, kbase_gpuprops_free_user_buffer,
 	  "GPU property population failed" },
-#endif
 /// MTK: r25p0 remove this temporarily, or bifrost gpu will loading fail and crash when kernel init
 // this will fix with ARM's next DDK version @{
 /*

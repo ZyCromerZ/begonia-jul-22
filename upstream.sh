@@ -14,6 +14,8 @@ done
 
 DoPush()
 {
-    git push --all origin -f || DoPush
+    get="${@}"
+    git push --all $get -f || DoPush $get
 }
-DoPush
+DoPush origin
+DoPush public

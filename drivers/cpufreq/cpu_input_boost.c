@@ -312,6 +312,9 @@ static int fb_notifier_cb(struct notifier_block *nb,
 	struct boost_drv *b = container_of(nb, typeof(*b), fb_notif);
 	int *blank = ((struct fb_event *)data)->data;
 
+	if (enabled == 0)
+		return NOTIFY_OK;
+
 	/* Parse framebuffer blank events as soon as they occur */
 	if (action != FB_EARLY_EVENT_BLANK)
 		return NOTIFY_OK;
@@ -334,7 +337,9 @@ static void cpu_input_boost_input_event(struct input_handle *handle,
 {
 	struct boost_drv *b = handle->handler->private;
 
-	__cpu_input_boost_kick(b);
+	if (enabled == 1)
+		__cpu_input_boost_kick(b);
+
 }
 
 static int cpu_input_boost_input_connect(struct input_handler *handler,
